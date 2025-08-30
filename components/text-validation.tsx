@@ -15,6 +15,31 @@ interface TextValidationProps {
   apiKeys: ApiKeys
 }
 
+function parseValidationResult(result: any) {
+  let parsed = { ...result }
+
+  if (typeof parsed.correctedText === 'string') {
+    let text = parsed.correctedText.trim()
+
+    const jsonMatch = text.match(/```json\s*([\s\S]+?)\s*```/)
+    if (jsonMatch) text = jsonMatch[1]
+
+    try {
+
+      const nested = JSON.parse(text)
+
+      parsed.correctedText = nested.correctedText ?? text
+      parsed.isCorrect = nested.isCorrect ?? parsed.isCorrect
+      parsed.errors = nested.errors ?? parsed.errors
+      parsed.confidence = nested.confidence ?? parsed.confidence
+    } catch {
+  
+      parsed.correctedText = text
+    }
+  }
+
+  return parsed
+}
 export function TextValidation({ apiKeys }: TextValidationProps) {
   const [inputText, setInputText] = useState('')
   const [selectedProviders, setSelectedProviders] = useState<string[]>([])
@@ -65,11 +90,13 @@ export function TextValidation({ apiKeys }: TextValidationProps) {
           })
         })
 
-        const result = await response.json()
-        return { provider, ...result }
-      })
+        const rawResult = await response.json()
+        const result = parseValidationResult(rawResult)
+          return { provider, ...result }
+        })
 
       const validationResults = await Promise.all(promises)
+      console.log(validationResults);
       setResults(validationResults)
       
       const allCorrect = validationResults.every(r => r.isCorrect)

@@ -41,49 +41,42 @@ export async function POST(request: NextRequest) {
 
 async function validateWithOpenAI(text: string, apiKey: string) {
   try {
-    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+    const response = await fetch('https://api.openai.com/v1/responses', {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${apiKey}`,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        model: 'gpt-4',
-        messages: [
-          {
-            role: 'system',
-            content: 'You are a content validator. Analyze the given text for factual accuracy, grammar, and clarity. Respond with JSON format: {"isCorrect": boolean, "correctedText": string, "errors": string[], "confidence": number}'
-          },
-          {
-            role: 'user', 
-            content: `Please validate this text: "${text}"`
-          }
-        ],
-        temperature: 0.1
+        model: 'gpt-3.5-turbo',
+        input: `Respond in JSON format: {"isCorrect": boolean, "correctedText": string, "errors": string[], "confidence": number}. Validate this text for factual accuracy: "${text}". Ignore grammatical issues. Only include errors if information is factually incorrect.`
       })
-    })
+    });
 
-    const data = await response.json()
-    const content = data.choices[0].message.content
-    
+    const data = await response.json();
+    console.log(data);
+
+    const content = data.output_text ?? data.output?.[0]?.content?.[0]?.text ?? '';
+    console.log(content);
     try {
-      return JSON.parse(content)
+      return JSON.parse(content);
     } catch {
       return {
         isCorrect: false,
         correctedText: content,
         errors: ['Unable to parse validation response'],
         confidence: 0.5
-      }
+      };
     }
   } catch (error) {
-    throw new Error('OpenAI validation failed')
+    throw new Error('OpenAI validation failed');
   }
 }
 
+
 async function validateWithGemini(text: string, apiKey: string) {
   try {
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-pro:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -91,21 +84,23 @@ async function validateWithGemini(text: string, apiKey: string) {
       body: JSON.stringify({
         contents: [{
           parts: [{
-            text: `Validate this text for accuracy and correctness. Respond in JSON format: {"isCorrect": boolean, "correctedText": string, "errors": string[], "confidence": number}. Text to validate: "${text}"`
+            text: `Respond in JSON format: {"isCorrect": boolean, "correctedText": string, "errors": string[], "confidence": number}.Validate this text for accuracy and correctness and ignore grammatical or language strictness also do not add grammatical mistakes in errors clearly avoid them. Only add errors if the information given is wrong otherwise show no error.Text to validate: "${text}"`
           }]
         }]
       })
     })
 
     const data = await response.json()
-    const content = data.candidates[0].content.parts[0].text
+    const content = data.candidates?.[0]?.content?.parts?.[0]?.text ?? ''
     
+    const cleanedText = content.replace(/```json\s*|```/g, '').trim()
+
     try {
-      return JSON.parse(content)
+      return JSON.parse(cleanedText)
     } catch {
       return {
         isCorrect: false,
-        correctedText: content,
+        correctedText: cleanedText,
         errors: ['Unable to parse validation response'],
         confidence: 0.5
       }
@@ -129,7 +124,7 @@ async function validateWithClaude(text: string, apiKey: string) {
         max_tokens: 1000,
         messages: [{
           role: 'user',
-          content: `Validate this text for accuracy and correctness. Respond in JSON format: {"isCorrect": boolean, "correctedText": string, "errors": string[], "confidence": number}. Text: "${text}"`
+          content: `Respond in JSON format: {"isCorrect": boolean, "correctedText": string, "errors": string[], "confidence": number}.Validate this text for accuracy and correctness and ignore grammatical or language strictness also do not add grammatical mistakes in errors clearly avoid them. Only add errors if the information given is wrong otherwise show no error.Text to validate: "${text}"`
         }]
       })
     })
@@ -161,7 +156,7 @@ async function validateWithLLaMA(text: string, apiKey: string) {
         'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        inputs: `Validate this text for accuracy: "${text}". Respond in JSON: {"isCorrect": boolean, "correctedText": string, "errors": string[], "confidence": number}`
+        inputs: `Respond in JSON format: {"isCorrect": boolean, "correctedText": string, "errors": string[], "confidence": number}.Validate this text for accuracy and correctness and ignore grammatical or language strictness also do not add grammatical mistakes in errors clearly avoid them. Only add errors if the information given is wrong otherwise show no error.Text to validate: "${text}"`
       })
     })
 
@@ -169,7 +164,7 @@ async function validateWithLLaMA(text: string, apiKey: string) {
     const content = data[0]?.generated_text || ''
     
     try {
-      const jsonMatch = content.match(/\{.*\}/s)
+      const jsonMatch = content.match(/\{.*\}/)
       return jsonMatch ? JSON.parse(jsonMatch[0]) : {
         isCorrect: false,
         correctedText: content,

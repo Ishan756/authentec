@@ -1,3 +1,30 @@
+/* Animated dark glowing background */
+
+.dark-glow-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(ellipse 60% 40% at 30% 30%, #030563 0%, transparent 80%),
+              radial-gradient(ellipse 40% 30% at 70% 70%, #fbbf24 0%, transparent 90%),
+              linear-gradient(135deg, #10131a 0%, #181c24 50%, #232837 100%);
+  animation: bgGlowMove 12s ease-in-out infinite alternate;
+  opacity: 0.45;
+}
+
+@keyframes bgGlowMove {
+  0% { background-position: 30% 30%, 70% 70%, 0 0; }
+  100% { background-position: 40% 40%, 60% 60%, 100% 100%; }
+}
+
+/* Interactive hover glow for cards and buttons */
+.hover-glow {
+  transition: box-shadow 0.3s, border-color 0.3s;
+}
+.hover-glow:hover, .hover-glow:focus {
+  box-shadow: 0 0 0 1px #6366f1, 0 0 4px 1.5px #0e0e20, 0 0 8px 2px #594106;
+  border-color: #6366f1;
+}
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -45,25 +72,25 @@
     --radius: 0.5rem;
   }
   .dark {
-    --background: 0 0% 3.9%;
-    --foreground: 0 0% 98%;
-    --card: 0 0% 3.9%;
-    --card-foreground: 0 0% 98%;
-    --popover: 0 0% 3.9%;
-    --popover-foreground: 0 0% 98%;
-    --primary: 0 0% 98%;
-    --primary-foreground: 0 0% 9%;
-    --secondary: 0 0% 14.9%;
-    --secondary-foreground: 0 0% 98%;
-    --muted: 0 0% 14.9%;
-    --muted-foreground: 0 0% 63.9%;
-    --accent: 0 0% 14.9%;
-    --accent-foreground: 0 0% 98%;
+    --background: 222 47% 7%; /* deep blue-black */
+    --foreground: 220 16% 92%;
+    --card: 222 47% 10%;
+    --card-foreground: 220 16% 92%;
+    --popover: 222 47% 10%;
+    --popover-foreground: 220 16% 92%;
+    --primary: 220 16% 92%;
+    --primary-foreground: 222 47% 7%;
+    --secondary: 222 47% 14%;
+    --secondary-foreground: 220 16% 92%;
+    --muted: 222 47% 12%;
+    --muted-foreground: 220 16% 60%;
+    --accent: 222 47% 16%;
+    --accent-foreground: 220 16% 92%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 0 0% 98%;
-    --border: 0 0% 14.9%;
-    --input: 0 0% 14.9%;
-    --ring: 0 0% 83.1%;
+    --border: 222 47% 18%;
+    --input: 222 47% 14%;
+    --ring: 220 16% 92%;
     --chart-1: 220 70% 50%;
     --chart-2: 160 60% 45%;
     --chart-3: 30 80% 55%;
@@ -78,5 +105,18 @@
   }
   body {
     @apply bg-background text-foreground;
+    background: linear-gradient(135deg, #10131a 0%, #181c24 50%, #232837 100%) !important;
+  }
+
+  .dark body {
+    background: linear-gradient(135deg, #10131a 0%, #181c24 50%, #232837 100%) !important;
+  }
+
+  .glass-card {
+    background: rgba(24, 28, 36, 0.85);
+    border-radius: 1.2rem;
+    box-shadow: 0 4px 32px 0 rgba(0,0,0,0.18);
+    border: 1px solid rgba(255,255,255,0.06);
+    backdrop-filter: blur(8px);
   }
 }

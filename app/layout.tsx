@@ -8,7 +8,7 @@ import { SessionProvider } from '@/components/session-provider';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'AI Content Validator',
+  title: 'AuthenTec',
   description: 'Validate and correct content using multiple AI providers',
 };
 
@@ -20,6 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
+        <div className="dark-glow-bg" aria-hidden="true"></div>
         <SessionProvider>
           <ThemeProvider
             attribute="class"

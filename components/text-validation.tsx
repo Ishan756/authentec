@@ -8,12 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Loader2, CheckCircle, XCircle, AlertCircle } from 'lucide-react'
-import { ApiKeys } from '@/app/dashboard/page'
 import { toast } from 'sonner'
 
-interface TextValidationProps {
-  apiKeys: ApiKeys
-}
+interface TextValidationProps {}
 
 function parseValidationResult(result: any) {
   let parsed = { ...result }
@@ -40,9 +37,9 @@ function parseValidationResult(result: any) {
 
   return parsed
 }
-export function TextValidation({ apiKeys }: TextValidationProps) {
+export function TextValidation({}: TextValidationProps) {
   const [inputText, setInputText] = useState('')
-  const [selectedProviders, setSelectedProviders] = useState<string[]>([])
+  const [selectedProviders, setSelectedProviders] = useState<string[]>(['gemini','claude'])
   const [validating, setValidating] = useState(false)
   const [results, setResults] = useState<Array<{
     provider: string
@@ -52,9 +49,7 @@ export function TextValidation({ apiKeys }: TextValidationProps) {
     errors?: string[]
   }>>([])
 
-  const availableProviders = Object.entries(apiKeys)
-    .filter(([_, key]) => key.trim() !== '')
-    .map(([provider, _]) => provider)
+  const availableProviders = ['gemini','claude']
 
   const handleProviderToggle = (provider: string) => {
     setSelectedProviders(prev => 
@@ -83,11 +78,7 @@ export function TextValidation({ apiKeys }: TextValidationProps) {
         const response = await fetch('/api/validate-text', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            text: inputText,
-            provider,
-            apiKey: apiKeys[provider as keyof ApiKeys]
-          })
+          body: JSON.stringify({ text: inputText, provider })
         })
 
         const rawResult = await response.json()

@@ -8,14 +8,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Checkbox } from '@/components/ui/checkbox'
 import { Badge } from '@/components/ui/badge'
 import { Upload, Loader2, CheckCircle, XCircle, AlertCircle, Image as ImageIcon } from 'lucide-react'
-import { ApiKeys } from '@/app/dashboard/page'
 import { toast } from 'sonner'
 
-interface ImageValidationProps {
-  apiKeys: ApiKeys
-}
+interface ImageValidationProps {}
 
-export function ImageValidation({ apiKeys }: ImageValidationProps) {
+export function ImageValidation({}: ImageValidationProps) {
   const [selectedFile, setSelectedFile] = useState<File | null>(null)
   const [previewUrl, setPreviewUrl] = useState<string>('')
   const [selectedProviders, setSelectedProviders] = useState<string[]>([])
@@ -29,9 +26,7 @@ export function ImageValidation({ apiKeys }: ImageValidationProps) {
     issues?: string[]
   }>>([])
 
-  const availableProviders = Object.entries(apiKeys)
-    .filter(([_, key]) => key.trim() !== '')
-    .map(([provider, _]) => provider)
+  const availableProviders = ['gemini','claude']
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0]
@@ -78,7 +73,7 @@ export function ImageValidation({ apiKeys }: ImageValidationProps) {
       const formData = new FormData()
       formData.append('image', selectedFile)
       formData.append('providers', JSON.stringify(selectedProviders))
-      formData.append('apiKeys', JSON.stringify(apiKeys))
+  // server uses env keys; no apiKeys sent
 
       const response = await fetch('/api/validate-image', {
         method: 'POST',

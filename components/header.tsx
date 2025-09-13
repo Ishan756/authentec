@@ -26,7 +26,7 @@ export function Header({ user }: HeaderProps) {
       <div className="container mx-auto px-4 h-16 flex items-center justify-between">
         <div className="flex items-center space-x-2">
           <Bot className="h-8 w-8 text-primary" />
-          <span className="text-xl font-bold">AI Validator</span>
+          <span className="text-xl font-bold">AuthenTec</span>
         </div>
 
         <div className="flex items-center space-x-4">
